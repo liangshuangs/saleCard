@@ -15,13 +15,13 @@ gitPull(){
   fi
 }
 msg=$1 # $1 为第一个参数
-echo $msg
 if [ -n "$msg" ]; then
   git add -A
   git commit -m"$msg"
   gitPull
   git status
-  echo "请最后完成push"
+  read -r -p "请输入需要push到的远程分支" input
+  git push origin $input
 else
   echo "请添加注释"
 fi
