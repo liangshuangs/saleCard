@@ -21,7 +21,12 @@ if [ -n "$msg" ]; then
   gitPull
   git status
   read -r -p "请输入需要push到的远程分支" input
-  git push origin $input
+  if [ -n "$input" ]; then
+    git push origin $input
+  else 
+      echo "请输入远程分支"
+      exit
+  fi    
 else
   echo "请添加注释"
 fi
