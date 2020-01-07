@@ -1,7 +1,8 @@
 
 import axios from 'axios'
 import Qs from 'qs'
-let url = `/api`;
+import vm from '../index'
+let url = `/api`
 // let url ="http://192.168.187.192:8005/"
 
 process.env.NODE_ENV == 'development' ? url : url = ''
@@ -12,6 +13,7 @@ export const baseUrl = `${url}`
 //请求前
 axios.interceptors.request.use(
     config => {
+      vm.$loading.show()
         config.headers = {
             'cmodel':window.FCData?window.FCData.cmodel:'',
             'imei':window.FCData?window.FCData.imei:'',
@@ -30,6 +32,7 @@ axios.interceptors.request.use(
     );
 //请求后
 axios.interceptors.response.use(function (response) {
+  setTimeout(() => { vm.$loading.hide()},200)
     // debugger
     if(response.data.do == "redirect"){
          window.location.href = response.data.url

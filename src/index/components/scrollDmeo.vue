@@ -125,8 +125,5 @@ export default {
     overflow: hidden;
     background-color: #777;
 }
-li{
-    height: 40px;
-}
 
 </style>

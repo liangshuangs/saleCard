@@ -3,30 +3,30 @@
         <div class="header">
             <div class="logo"></div>
         </div>
-        <div class="content">
+          <b-scroll
+            class="content"
+          >
+            <div class="scroll-wraper"> 
             <div class="user-info">
                 <img src="../../assets/img/avatar.png" class="avatar">
-                <p class="user-name text-overHidden">史璐明 (资深顾问)</p>
+                <p class="user-name text-overHidden">{{userInfo.name}} ({{userInfo.position}})</p>
                 <p class="user-company text-overHidden">
-                    <i class="icon approve-icon"></i>北京五八信息技术有限公司
+                    <i class="icon approve-icon"></i>{{userInfo.company}}
                 </p>
                 <p class="user-tel user-info-item text-overHidden">
-                    <i class="icon tel-icon"></i>13898665355
+                    <i class="icon tel-icon"></i>{{userInfo.tel}}
                 </p>
                 <p class="user-info-item text-overHidden">
-                    <i class="icon email-icon"></i>shiluming@58.com
+                    <i class="icon email-icon"></i>{{userInfo.email}}
                 </p>
                 <p class="user-info-item text-overHidden">
-                    <i class="icon address-icon"></i>北京市朝阳区酒仙桥北路甲10号院
+                    <i class="icon address-icon"></i>{{userInfo.address}}
                 </p>
                 <div class="good-skill">
                     <span class="good-skill-title">擅长领域</span>
                     <p class="split"></p>
                     <ul class="skill">
-                        <li class="skill-item">婚庆</li>
-                        <li class="skill-item">搬家</li>
-                        <li class="skill-item">本地服务</li>
-                        <li class="skill-item">获客小能手</li>
+                        <li class="skill-item" v-for="(item, index) in domains" :key="index">{{item}}</li>
                     </ul>
                 </div>
                 <div class="tip">购买58产品，找我就对了只有在有起伏的道路，你才能看到更多的风景，最多填写45个汉字90个字符</div>
@@ -47,11 +47,11 @@
             </div>
             <div class="sale-ad" v-show="true">
                 <p class="ad-title">营销活动</p>
-                <swpier-demo/>
+                <swpier-demo :imgData="activeImg"/>
             </div>
-        </div>
+            </div>
+          </b-scroll>
         <div class="footer" >
-          <p class="ad-tip">58同城-让生活更简单</p>
             <ul class="footer-btn" v-show="isSale">
                 <li class="edit-btn edit" @click="goEditPage">编辑名片</li>
                 <li class="edit-btn share">分享名片(海报)</li>
@@ -62,31 +62,94 @@
 
 <script>
 // 滑动组件demo
-import Bscroll from '@/index/components/scrollDmeo';
+import BScroll from '@/index/components/common/scroll'
+import {stopScroll} from '@/index/utils/scroll'
 // loading组件demo
 import Loading from '@/index/components/loading';
 // 轮播图组件demo
 import swpierDemo from '@/index/components/swpierDemo';
+import * as actions from './sever.js';
 export default {
   components: {
-    Bscroll,
     Loading,
+    BScroll,
     swpierDemo
   },
   data() {
     return {
       isSale: true, // 是否是销售人员
-      initdata: []
+      userInfo: {},// 销售信息,
+      activeImg: [],// 活动轮播图
+      bspid: 'sxf58mhk6o2'
     };
   },
-  mounted() {},
+  mounted() {
+    this._getUserInfo()
+    this._getActivesImg()
+  },
+  computed: {
+    
+    domains() {
+      let domains = this.userInfo && this.userInfo.domainMsg
+      if(domains) {
+        let arr = domains.split(',')
+        return arr
+      }
+    }
+  },
   methods: {
+    async _getUserInfo () {
+      let params = {
+        bspid: this.bspid
+      }
+      let res = await actions.getUserInfo(params);
+      if(res && res.code === 200) {
+        this.userInfo = res.result || {} 
+      }
+    },
+    // 获取活动图片
+    async _getActivesImg () {
+      let params = {
+        bspid: this.bspid
+      }
+      let res = await actions.getActiveImg(params);
+      if(res && res.code === 200) {
+        this.activeImg = res.result || []
+      }
+    },
     // 编辑
     goEditPage () {
       this.$router.push({
-        name: 'editPage'
+        name: 'editPage',
+        params: this.userInfo
       })
-    }
+    },
+    // 初始化滑动区域函数
+        initScroll () {
+            // 判断如果页面不存在当前注册的dom就跳出函数
+            if(!this.$refs.scroll){
+                return;
+            }else{
+
+                /**
+                 * Bscroll构造函数   
+                 * 第一个参数是 初始化dom对象
+                 * 第二个参数  滑动配置项
+                 */
+                this.myScrollDemo = new Bscroll(this.$refs.scroll,{
+                    scrollX: false,     //开启左右滑动
+                    scrollY: true,     //开启上下滑动
+                    probeType: 3,
+                    pullUpLoad:{       //配置开启上拉加载功能
+                        threshold:20,  //开启上拉加载的位置
+                    },
+                    pullDownRefresh:{  //配置开启下拉刷新功能
+                        threshold:40,  //开启下拉刷新的位置
+                        stop:20        //刷新过程中上部留白的高度
+                    },
+                })
+            }
+        }
   }
 };
 </script>
@@ -95,11 +158,18 @@ export default {
 .home {
   box-sizing: border-box;
   background-color: #ffffff;
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
 }
 .header {
-  width: 100%;
   height: 150px;
+  position: fixed;
+  z-index: 11;
+  top: 0;
+  width: 100vw;
   background: linear-gradient(
     270deg,
     rgba(76, 57, 255, 1) 0%,
@@ -115,17 +185,23 @@ export default {
   }
 }
 .content {
-  background-color: #ffffff;
-  width: 100%;
-  position: relative;
+  z-index: 22;
+   position: absolute;
+   top: 75px;
+   left: 15px;
+   right: 15px;
+   overflow: hidden;
+   bottom: 50px;
+   border-radius: 10px 10px 0 0;
+    overscroll-behavior-y: none;
+  .scroll-wraper {
+  // overscroll-behavior-y: none;
+  }
   .user-info {
-    margin: 0 auto;
     text-align: center;
-    position: relative;
     box-sizing: border-box;
-    top: -75px;
     padding-bottom: 40px;
-    width: 345px;
+    width: 100%;
     background: rgba(255, 255, 255, 1);
     box-shadow: 0px 4px 10px 0px rgba(226, 226, 226, 0.5);
     border-radius: 10px;
@@ -272,7 +348,6 @@ export default {
   }
   .sale-ad {
     margin: 0 15px;
-    margin-top: -55px;
     padding-bottom: 25px;
     .ad-title {
       font-size: 15px;
@@ -300,8 +375,13 @@ export default {
 }
 .footer {
   margin: 10px 15px 0 15px;
-  padding-bottom: 20px;
+  position: fixed;
+  bottom: 0;
+  background-color: #ffffff;
+  padding-bottom: 10px;
+  width: 345px;
   text-align: center;
+  z-index: 33;
   .ad-tip {
   text-align: center;
   font-size: 14px;

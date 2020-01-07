@@ -14,8 +14,9 @@ body{
 </template>
 
 <script>
-
+import {scroll} from '@/index/utils/scroll'
 export default {
-
+  mounted() {
+  },
 };
 </script>

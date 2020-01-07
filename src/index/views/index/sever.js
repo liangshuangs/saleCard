@@ -1,5 +1,6 @@
 import { baseUrl } from '@/index/axios/index.js';
 import axios from 'axios';
+let url= "/api"
 
 
 /**
@@ -15,4 +16,16 @@ export const postMethods = (obj) => {
  */
 export const getMethods = () => {
   return axios.get(`${baseUrl}/get`)
+}
+// 获取用户信息
+export const getUserInfo = (params) => {
+  return axios.post(`${url}/user/userInfo`,params)
+}
+// 获取活动营销轮播图
+export const getActiveImg = (params) => {
+  return axios.post(`${url}/user/getActives`,params)
+}
+// 保存个人信息
+export const updateInfo = (params) => {
+  return axios.post(`${url}/user/editInfo`,params)
 }

@@ -95,3 +95,42 @@ export default function scroll($container, selectorScrollable) {
   // 防止多次重复绑定
   $container.data('isBindScroll', true)
 };
+export function stopScroll (scrollBox) {
+  let startY = 0;
+// const scrollBox = document.querySelector('.scroll-box');
+
+document.body.addEventListener('touchstart', (e) => {
+  startY = e.touches[0].pageY;
+}, { passive: false });
+
+document.body.addEventListener('touchmove', (e) => {
+  const moveY = e.touches[0].pageY;
+  const top = scrollBox.scrollTop;
+  const ch = scrollBox.clientHeight;
+  const sh = scrollBox.scrollHeight;
+  if (!isChildTarget(e.target, scrollBox)) {
+    e.preventDefault();
+  } else if ((top === 0 && moveY > startY) || (top + ch === sh && moveY < startY)) {
+    e.preventDefault();
+  }
+}, { passive: false });
+}
+function isChildTarget(child, parent, justChild = flase) { 
+  // justChild为true则只判断是否为子元素，若为false则判断是否为本身或者子元素 默认为false
+  let parentNode;
+  if (justChild) {
+    parentNode = child.parentNode;
+  } else {
+    parentNode = child;
+  }
+  
+  if (child && parent) {
+    while (parentNode) {
+      if (parent === parentNode) {
+        return true;
+      }
+      parentNode = parentNode.parentNode;
+    }
+  }
+  return false;
+}

@@ -61,7 +61,7 @@ module.exports = {
     // 本地开发代理,默认转发本地的1111
     proxy: {
         '/api': {
-            target: 'http://192.168.187.192:8080',
+            target: 'http://10.252.54.128:3000',
             changeOrigin: true,
             pathRewrite: {
                 '^/api': ''
